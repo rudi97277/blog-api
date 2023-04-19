@@ -9,13 +9,25 @@ class Blog extends Model
 {
     use HasFactory;
 
-    public CONST TRENDING = 1;
-    public CONST NORMAL = 0;
+    public const TRENDING = 1;
+    public const NORMAL = 0;
+    public const LIKE = 1;
+    public const DISLIKE = 0;
 
     protected $guarded = ['id'];
 
     public function comment()
     {
         return $this->hasMany(BlogComment::class);
+    }
+
+    public function like()
+    {
+        return $this->hasMany(BlogReaction::class)->where('reaction', Blog::LIKE);
+    }
+
+    public function dislike()
+    {
+        return $this->hasMany(BlogReaction::class)->where('reaction', Blog::DISLIKE);
     }
 }

@@ -28,13 +28,15 @@ class BlogController extends Controller
         $blogs = Blog::when($request->status, function ($query) use ($request) {
             $query->where('status', $request->status);
         })
-        ->when($request->author,function($query) use ($request) {
-            $query->where('author',$request->author);
-        })
-        ->when($request->date,function($query) use ($request) {
-            $query->whereDate('created_at',$request->date);
-        })
-        ->get();
+            ->when($request->author, function ($query) use ($request) {
+                $query->where('author', $request->author);
+            })
+            ->when($request->date, function ($query) use ($request) {
+                $query->whereDate('created_at', $request->date);
+            })
+            ->withCount('like')
+            ->withCount('dislike')
+            ->get();
 
         return $this->showOne($blogs);
     }
@@ -72,9 +74,10 @@ class BlogController extends Controller
      */
     public function show($id)
     {
-        $blog = Blog::with('comment')->find($id);
+        $blog = Blog::with('comment', function ($query) {
+            $query->withCount('like')->withCount('dislike');
+        })->withCount('like')->withCount('dislike')->find($id);
         return $this->showOne($blog);
-
     }
 
     /**
@@ -92,11 +95,11 @@ class BlogController extends Controller
             'content' => 'nullable|string'
         ]);
 
-        $data = collect($data)->map(function($item) {
+        $data = collect($data)->map(function ($item) {
             return htmlentities($item);
         })->toArray();
 
-        $blog = Blog::where('author',$user->id)
+        $blog = Blog::where('author', $user->id)
             ->findOrFail($id);
 
         $blog->update($data);
@@ -113,7 +116,7 @@ class BlogController extends Controller
     public function destroy($id)
     {
         $user = auth()->user();
-        $blog = Blog::where('author',$user->id)
+        $blog = Blog::where('author', $user->id)
             ->findOrFail($id);
 
         return $this->showOne($blog->delete() ? true : false);
@@ -137,8 +140,8 @@ class BlogController extends Controller
             'user_id' => $user->id
         ];
 
-        if($request->type == 'like' || $request->type == 'dislike')
-            $reaction = BlogReaction::updateOrCreate($matchKey,[
+        if ($request->type == 'like' || $request->type == 'dislike')
+            $reaction = BlogReaction::updateOrCreate($matchKey, [
                 'reaction' => $reaction[$request->type]
             ]);
 
