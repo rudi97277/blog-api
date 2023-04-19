@@ -74,9 +74,9 @@ class BlogController extends Controller
      */
     public function show($id)
     {
-        $blog = Blog::with('comment', function ($query) {
+        $blog = Blog::with(['comment' => function ($query) {
             $query->withCount('like')->withCount('dislike');
-        })->withCount('like')->withCount('dislike')->find($id);
+        }])->withCount('like')->withCount('dislike')->find($id);
         return $this->showOne($blog);
     }
 
