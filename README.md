@@ -62,3 +62,14 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## How To Run ~
+1. git clone this project to your local working environment
+2. go to the project directory
+3. run `composer install` in terminal
+4. copy paste the `.env.example` file and rename it to `.env`
+5. run `php artisan key:generate` in your command line terminal
+6. run `php artisan migrate` to run database migration, type `yes` if database doesn't exists
+7. run `php artisan serve` in your command line terminal to run the server
+
+**NOTE :** to fully run this project in your locale you need to import kada database to your locale,
