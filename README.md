@@ -62,6 +62,9 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## About this project
+
+This project is a simple version of blogging allow user to post a blog, like or dislike a blog, make a comment in a blog and like or dislike a comment 
 
 ## How To Run ~
 1. git clone this project to your local working environment
