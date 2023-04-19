@@ -72,4 +72,3 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 6. run `php artisan migrate` to run database migration, type `yes` if database doesn't exists
 7. run `php artisan serve` in your command line terminal to run the server
 
-**NOTE :** to fully run this project in your locale you need to import kada database to your locale,
