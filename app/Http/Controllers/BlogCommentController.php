@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogComment;
 use App\Models\CommentReaction;
+use App\Models\User;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,6 @@ class BlogCommentController extends Controller
      */
     public function create(Request $request)
     {
-
     }
 
     /**
@@ -38,15 +38,15 @@ class BlogCommentController extends Controller
      */
     public function store(Request $request)
     {
-        $user = auth()->user();
+        $user = User::first();
         $request->validate([
-            'blog_id' => 'required|exists:blogs,id',
+            'article_id' => 'required|exists:blogs,id',
             'comment' => 'required|string'
         ]);
 
         $blogComment = BlogComment::create([
             'user_id' => $user->id,
-            'blog_id' => $request->blog_id,
+            'blog_id' => $request->article_id,
             'comment' => htmlentities($request->comment)
         ]);
 
@@ -84,14 +84,14 @@ class BlogCommentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $user = auth()->user();
+        $user = User::first();
         $request->validate([
             'comment' => 'required|string',
-            'blog_id' => 'required|exists:blogs,id'
+            'article_id' => 'required|exists:blogs,id'
         ]);
 
-        $blogComment = BlogComment::where('user_id',$user->id)
-            ->where('blog_id',$request->blog_id)
+        $blogComment = BlogComment::where('user_id', $user->id)
+            ->where('blog_id', $request->article_id)
             ->findOrFail($id);
 
         $blogComment->update([
@@ -99,8 +99,6 @@ class BlogCommentController extends Controller
         ]);
 
         return $this->showOne($blogComment);
-
-
     }
 
     /**
@@ -109,26 +107,30 @@ class BlogCommentController extends Controller
      * @param  \App\Models\BlogComment  $blogComment
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request,$id)
+    public function destroy(Request $request, $id)
     {
-        $user = auth()->user();
+        $user = User::first();
         $request->validate([
-            'blog_id' => 'required|exists:blogs,id'
+            'article_id' => 'required|exists:blogs,id'
         ]);
 
-        $blogComment = BlogComment::where('user_id',$user->id)
-            ->where('blog_id',$request->blog_id)
+        $blogComment = BlogComment::where('user_id', $user->id)
+            ->where('blog_id', $request->article_id)
             ->findOrFail($id);
+
+        if ($blogComment) {
+            CommentReaction::where('blog_comment_id', $blogComment->id)->delete();
+        }
 
         return $this->showOne($blogComment->delete() ? true : false);
     }
 
     public function react(Request $request)
     {
-        $user = auth()->user();
+        $user = User::first();
         $request->validate([
             'type' => 'required|string|in:like,dislike,remove',
-            'blog_comment_id' => 'required|exists:blog_comments,id'
+            'article_comment_id' => 'required|exists:blog_comments,id'
         ]);
 
         $reaction = [
@@ -137,12 +139,12 @@ class BlogCommentController extends Controller
         ];
 
         $matchKey = [
-            'blog_comment_id' => $request->blog_comment_id,
+            'blog_comment_id' => $request->article_comment_id,
             'user_id' => $user->id
         ];
 
-        if($request->type == 'like' || $request->type == 'dislike')
-            $reaction = CommentReaction::updateOrCreate($matchKey,[
+        if ($request->type == 'like' || $request->type == 'dislike')
+            $reaction = CommentReaction::updateOrCreate($matchKey, [
                 'reaction' => $reaction[$request->type]
             ]);
 

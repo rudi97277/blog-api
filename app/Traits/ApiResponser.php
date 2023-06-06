@@ -54,4 +54,26 @@ trait ApiResponser
         );
     }
 
+    protected function showPaginate($resultKey, Collection $resultValues, Collection $paginateCollection, $statusCode = null, $metaMessage = null)
+    {
+        return response()->json(
+            [
+                'meta' => [
+                    'success' => true,
+                    'code' => 20000,
+                    'message' => $metaMessage ?? 'Request success',
+                ],
+                'data' => [
+                    $resultKey => $resultValues->values(),
+                    'page_info' => [
+                        'last_page' => $paginateCollection['last_page'],
+                        'current_page' => $paginateCollection['current_page'],
+                        'path' => $paginateCollection['path'],
+                        'total' => $paginateCollection['total']
+                    ]
+                ]
+            ],
+            $statusCode ?? 200
+        );
+    }
 }

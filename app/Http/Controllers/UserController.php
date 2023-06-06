@@ -40,8 +40,8 @@ class UserController extends Controller
             'password' => 'required|min:6'
         ]);
 
-        $user = User::where('email',$request->email)->firstOrFail();
-        if(Hash::check($request->password, $user->password)){
+        $user = User::where('email', $request->email)->firstOrFail();
+        if (Hash::check($request->password, $user->password)) {
             $token = $user->createToken('Personal Access Token');
             return $this->showOne(['token' => $token->plainTextToken]);
         }
@@ -53,8 +53,9 @@ class UserController extends Controller
         return $this->showOne($token ? true : false);
     }
 
-    public function profile(){
-        $user = auth()->user();
+    public function profile()
+    {
+        $user = User::first();
         return $this->showOne($user);
     }
 }

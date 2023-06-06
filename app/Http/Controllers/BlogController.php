@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\BlogComment;
 use App\Models\BlogReaction;
+use App\Models\CommentReaction;
+use App\Models\User;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 
@@ -25,20 +28,11 @@ class BlogController extends Controller
         ]);
 
 
-        $blogs = Blog::when($request->status, function ($query) use ($request) {
-            $query->where('status', $request->status);
-        })
-            ->when($request->author, function ($query) use ($request) {
-                $query->where('author', $request->author);
-            })
-            ->when($request->date, function ($query) use ($request) {
-                $query->whereDate('created_at', $request->date);
-            })
-            ->withCount('like')
+        $blogs = Blog::withCount('like')
             ->withCount('dislike')
-            ->get();
+            ->paginate($request->input('page_size'));
 
-        return $this->showOne($blogs);
+        return $this->showPaginate('articles', collect($blogs->items()), collect($blogs));
     }
 
 
@@ -50,7 +44,7 @@ class BlogController extends Controller
      */
     public function store(Request $request)
     {
-        $user = auth()->user();
+        $user = User::first();
         $request->validate([
             'title' => 'required|string',
             'content' => 'required|string',
@@ -89,7 +83,7 @@ class BlogController extends Controller
 
     public function update(Request $request, $id)
     {
-        $user = auth()->user();
+        $user = User::first();
         $data = $request->validate([
             'title' => 'nullable|string',
             'content' => 'nullable|string'
@@ -115,19 +109,27 @@ class BlogController extends Controller
      */
     public function destroy($id)
     {
-        $user = auth()->user();
+        $user = User::first();
         $blog = Blog::where('author', $user->id)
             ->findOrFail($id);
+
+        if ($blog) {
+            BlogReaction::where('blog_id', $blog->id)->delete();
+            $comment = BlogComment::where('blog_id', $blog->id);
+            $ids = $comment->get()->pluck('id');
+            CommentReaction::whereIn('blog_comment_id', $ids)->delete();
+            $comment->delete();
+        }
 
         return $this->showOne($blog->delete() ? true : false);
     }
 
     public function react(Request $request)
     {
-        $user = auth()->user();
+        $user = User::first();
         $request->validate([
             'type' => 'required|string|in:like,dislike,remove',
-            'blog_id' => 'required|exists:blogs,id'
+            'article_id' => 'required|exists:blogs,id'
         ]);
 
         $reaction = [
@@ -136,7 +138,7 @@ class BlogController extends Controller
         ];
 
         $matchKey = [
-            'blog_id' => $request->blog_id,
+            'blog_id' => $request->article_id,
             'user_id' => $user->id
         ];
 

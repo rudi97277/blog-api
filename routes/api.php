@@ -17,20 +17,18 @@ use App\Http\Controllers\UserController;
 |
 */
 
-Route::prefix('user')->group(function() {
-    Route::post('register',[UserController::class,'register']);
-    Route::post('login',[UserController::class,'login']);
+Route::prefix('user')->group(function () {
+    Route::post('register', [UserController::class, 'register']);
+    Route::post('login', [UserController::class, 'login']);
 });
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::prefix('user')->group(function() {
-        Route::get('profile',[UserController::class,'profile']);
-        Route::post('logout',[UserController::class,'logout']);
-    });
-
-    Route::post('blog/react',[BlogController::class,'react']);
-    Route::post('comment/react',[BlogCommentController::class,'react']);
-
-    Route::apiResource('blog',BlogController::class);
-    Route::apiResource('comment',BlogCommentController::class);
+Route::prefix('user')->group(function () {
+    Route::get('profile', [UserController::class, 'profile']);
+    Route::post('logout', [UserController::class, 'logout']);
 });
+
+Route::post('articles/react', [BlogController::class, 'react']);
+Route::post('comment/react', [BlogCommentController::class, 'react']);
+
+Route::apiResource('articles', BlogController::class);
+Route::apiResource('comment', BlogCommentController::class);
