@@ -21,4 +21,9 @@ class BlogComment extends Model
     {
         return $this->hasMany(CommentReaction::class)->where('reaction', BlogComment::DISLIKE);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

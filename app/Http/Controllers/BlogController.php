@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BlogReactResource;
+use App\Http\Resources\BlogResource;
 use App\Models\Blog;
 use App\Models\BlogComment;
 use App\Models\BlogReaction;
@@ -32,7 +34,9 @@ class BlogController extends Controller
             ->withCount('dislike')
             ->paginate($request->input('page_size'));
 
-        return $this->showPaginate('articles', collect($blogs->items()), collect($blogs));
+        $item = BlogResource::collection($blogs);
+
+        return $this->showPaginate('articles', collect($item), collect($blogs));
     }
 
 
@@ -71,7 +75,7 @@ class BlogController extends Controller
         $blog = Blog::with(['comment' => function ($query) {
             $query->withCount('like')->withCount('dislike');
         }])->withCount('like')->withCount('dislike')->find($id);
-        return $this->showOne($blog);
+        return $this->showOne(new BlogResource($blog));
     }
 
     /**
@@ -150,6 +154,6 @@ class BlogController extends Controller
         else $reaction = BlogReaction::where($matchKey)->delete() ? true : false;
 
 
-        return $this->showOne($reaction);
+        return $this->showOne(new BlogReactResource($reaction));
     }
 }

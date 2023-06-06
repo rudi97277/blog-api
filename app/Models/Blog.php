@@ -30,4 +30,9 @@ class Blog extends Model
     {
         return $this->hasMany(BlogReaction::class)->where('reaction', Blog::DISLIKE);
     }
+
+    public function author_data()
+    {
+        return $this->belongsTo(User::class, 'author');
+    }
 }

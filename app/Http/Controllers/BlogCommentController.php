@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BlogCommentReactResource;
+use App\Http\Resources\BlogCommentResource;
 use App\Models\BlogComment;
 use App\Models\CommentReaction;
 use App\Models\User;
@@ -50,7 +52,8 @@ class BlogCommentController extends Controller
             'comment' => htmlentities($request->comment)
         ]);
 
-        return $this->showOne($blogComment);
+
+        return $this->showOne(new BlogCommentResource($blogComment));
     }
 
     /**
@@ -98,7 +101,7 @@ class BlogCommentController extends Controller
             'comment' => htmlentities($request->comment)
         ]);
 
-        return $this->showOne($blogComment);
+        return $this->showOne(new BlogCommentResource($blogComment));
     }
 
     /**
@@ -150,7 +153,6 @@ class BlogCommentController extends Controller
 
         else $reaction = CommentReaction::where($matchKey)->delete() ? true : false;
 
-
-        return $this->showOne($reaction);
+        return $this->showOne(new BlogCommentReactResource($reaction));
     }
 }

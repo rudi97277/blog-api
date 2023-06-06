@@ -9,7 +9,11 @@ class CommentReaction extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
-    public CONST LIKE = 1;
-    public CONST DISLIKE = 0;
+    public const LIKE = 1;
+    public const DISLIKE = 0;
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
